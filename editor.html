@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Invitaciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f18;--bg2:#161926;--bg3:#1e2235;--bgh:#262a40;--bdr:#2a2e45;--acc:#e84393;--acch:#d63384;--accs:rgba(232,67,147,.15);--tx:#e8e8ee;--txd:#9395a8;--txm:#6b6e82;--ok:#4ade80;--err:#f87171;--r:10px;--font:'Inter',-apple-system,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:14px}
+body{font-family:var(--font);background:var(--bg);color:var(--tx);min-height:100vh}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+
+/* ═══ LAYOUT ═══ */
+.editor{max-width:900px;margin:0 auto;padding:1rem;min-height:100vh;display:flex;flex-direction:column}
+
+/* ═══ HEADER ═══ */
+.header{text-align:center;padding:1.5rem 0 1rem}
+.header h1{font-size:1.4rem;font-weight:700;margin-bottom:.2rem}
+.header h1 span{color:var(--acc)}
+.header p{color:var(--txd);font-size:.8rem}
+
+/* ═══ STEPS BAR ═══ */
+.steps-bar{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:1.2rem 1rem;margin-bottom:1.5rem;position:sticky;top:.5rem;z-index:100;backdrop-filter:blur(12px)}
+.steps-row{display:flex;align-items:center;justify-content:center;gap:0;position:relative}
+.step-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;z-index:2;flex:1;max-width:110px}
+.step-icon{width:44px;height:44px;border-radius:50%;background:var(--bg3);border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;transition:all .3s;margin-bottom:.35rem}
+.step-icon svg{width:20px;height:20px;stroke:var(--txm);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:all .3s}
+.step-label{font-size:.6rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--txm);transition:color .3s}
+.step-item.active .step-icon{background:var(--acc);border-color:var(--acc);box-shadow:0 0 20px rgba(232,67,147,.4)}
+.step-item.active .step-icon svg{stroke:#fff}
+.step-item.active .step-label{color:var(--acc)}
+.step-item.done .step-icon{background:var(--bg3);border-color:var(--ok)}
+.step-item.done .step-icon svg{stroke:var(--ok)}
+.step-item.done .step-label{color:var(--txd)}
+.progress-track{position:absolute;top:22px;left:55px;right:55px;height:3px;background:var(--bdr);border-radius:2px;z-index:1}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acch));border-radius:2px;transition:width .4s ease}
+@media(max-width:600px){.step-icon{width:36px;height:36px}.step-icon svg{width:16px;height:16px}.step-label{font-size:.5rem}.steps-bar{padding:.8rem .5rem}}
+
+/* ═══ STEP CONTENT ═══ */
+.step-content{flex:1}
+.step{display:none;animation:fadeIn .3s ease}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-hd{margin-bottom:1.5rem}
+.step-hd h2{font-size:1.5rem;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.step-hd h2 .ico{font-size:1.3rem}
+.step-hd p{color:var(--txd);font-size:.85rem;margin-top:.3rem}
+
+/* ═══ FORM ═══ */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.fg{grid-template-columns:1fr}}
+.ff{grid-column:1/-1}
+.fi{display:flex;flex-direction:column;gap:.3rem}
+.fi label{font-size:.7rem;font-weight:600;color:var(--txd);text-transform:uppercase;letter-spacing:.06em}
+.fi input,.fi textarea,.fi select{padding:.7rem .85rem;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);color:var(--tx);font-family:var(--font);font-size:.9rem;transition:border-color .2s;outline:none}
+.fi input:focus,.fi textarea:focus,.fi select:focus{border-color:var(--acc)}
+.fi textarea{resize:vertical;min-height:70px}
+.fi select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239395a8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:2rem}
+.fhint{font-size:.65rem;color:var(--txm);margin-top:.15rem}
+.fdiv{grid-column:1/-1;border:none;border-top:1px solid var(--bdr);margin:.5rem 0}
+
+/* ═══ BUTTONS ═══ */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;border-radius:var(--r);font-family:var(--font);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid transparent;white-space:nowrap}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+.btn-p{background:var(--acc);color:#fff;border-color:var(--acc)}.btn-p:hover{background:var(--acch)}
+.btn-s{background:transparent;color:var(--tx);border-color:var(--bdr)}.btn-s:hover{background:var(--bgh)}
+.btn-d{background:transparent;color:var(--err);border-color:var(--err);font-size:.75rem;padding:.35rem .6rem}.btn-d:hover{background:rgba(248,113,113,.1)}
+
+/* ═══ NAVIGATION BUTTONS ═══ */
+.nav-btns{display:flex;gap:.75rem;padding:1.5rem 0;margin-top:1rem;border-top:1px solid var(--bdr)}
+.nav-btn-prev{flex:1;padding:.85rem;border-radius:var(--r);font-family:var(--font);font-size:.95rem;font-weight:500;cursor:pointer;border:1px solid var(--bdr);background:transparent;color:var(--tx);transition:all .2s;text-align:center}
+.nav-btn-prev:hover{background:var(--bgh);border-color:var(--txm)}
+.nav-btn-next{flex:1;padding:.85rem;border-radius:var(--r);font-family:var(--font);font-size:.95rem;font-weight:600;cursor:pointer;border:none;background:var(--acc);color:#fff;transition:all .2s;text-align:center}
+.nav-btn-next:hover{background:var(--acch)}
+.nav-btn-next:disabled{opacity:.4;cursor:not-allowed}
+
+/* ═══ THEMES CAROUSEL ═══ */
+.themes-carousel{display:flex;gap:1rem;overflow-x:auto;padding:1rem .5rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.themes-carousel::-webkit-scrollbar{height:6px}
+.themes-carousel::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.thm-card{min-width:180px;max-width:200px;border:2px solid var(--bdr);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;background:var(--bg2);flex-shrink:0;scroll-snap-align:center;position:relative}
+.thm-card:hover{border-color:var(--txm);transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
+.thm-card.sel{border-color:var(--acc);box-shadow:0 0 0 3px var(--accs)}
+.thm-card.sel::after{content:'\u2713';position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:.7rem;display:flex;align-items:center;justify-content:center;z-index:5;font-weight:700}
+.thm-phone{height:240px;display:flex;align-items:center;justify-content:center;padding:10px;position:relative}
+.thm-phone-frame{width:100%;height:100%;border-radius:12px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.08)}
+.thm-phone-screen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem .5rem;position:relative;overflow:hidden}
+.thm-phone-screen .thm-floral{position:absolute;inset:0;width:100%;height:100%;opacity:.5;pointer-events:none}
+.thm-phone-screen .thm-floral-br{position:absolute;bottom:-5px;right:-5px;width:40px;height:40px;opacity:.35;transform:rotate(180deg)}
+.thm-phone-screen .thm-std{font-size:.35rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.3rem;opacity:.5}
+.thm-phone-screen .thm-names{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:1.1rem;line-height:1.15;text-align:center;margin-bottom:.2rem}
+.thm-phone-screen .thm-amp{font-size:.6em;display:block;opacity:.7;margin:.05rem 0}
+.thm-phone-screen .thm-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.4rem;opacity:.45;text-align:center;max-width:90%;margin-bottom:.4rem}
+.thm-phone-screen .thm-date{display:flex;align-items:center;gap:.15rem;font-size:.35rem;letter-spacing:.1em;opacity:.5}
+.thm-phone-screen .thm-date-num{font-family:'Cormorant Garamond',serif;font-size:.9rem;font-weight:300;border-left:1px solid currentColor;border-right:1px solid currentColor;padding:0 .3rem;line-height:1;opacity:.7}
+.thm-info{padding:.6rem .7rem;border-top:1px solid var(--bdr)}
+.thm-name{font-size:.82rem;font-weight:600}
+.thm-desc{font-size:.6rem;color:var(--txm);margin-top:.1rem}
+.thm-dots{display:flex;gap:.2rem;margin-top:.3rem}
+.thm-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}
+.carousel-hint{text-align:center;font-size:.7rem;color:var(--txm);margin-top:.5rem;font-style:italic}
+
+/* ═══ COLOR CUSTOM ═══ */
+.colors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem;margin-top:1rem}
+.color-item{display:flex;align-items:center;gap:.5rem;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:.5rem}
+.color-item input[type=color]{width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;background:none;padding:0;flex-shrink:0}
+.color-item input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.color-item input[type=color]::-webkit-color-swatch{border:2px solid rgba(255,255,255,.15);border-radius:50%}
+.color-item .color-info{flex:1;min-width:0}
+.color-item .color-name{font-size:.65rem;color:var(--txd);font-weight:500}
+.color-item .color-hex{font-size:.6rem;color:var(--txm);font-family:monospace}
+
+/* ═══ EDITABLE ITEMS (timeline, gifts, swatches) ═══ */
+.edit-item{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:1rem;margin-bottom:.75rem;position:relative}
+.edit-item .item-num{position:absolute;top:-7px;left:10px;background:var(--acc);color:#fff;font-size:.55rem;font-weight:700;padding:.1rem .4rem;border-radius:8px}
+.edit-item .item-rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--bdr);color:var(--txm);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .15s}
+.edit-item .item-rm:hover{background:rgba(248,113,113,.1);border-color:var(--err);color:var(--err)}
+.sw-row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.sw-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.4rem;position:relative}
+.sw-item input[type=color]{width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;background:none;padding:0}
+.sw-item input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.sw-item input[type=color]::-webkit-color-swatch{border:2px solid rgba(255,255,255,.1);border-radius:50%}
+.sw-item input[type=text]{width:55px;padding:.1rem .2rem;font-size:.6rem;text-align:center;background:var(--bg3);border:1px solid var(--bdr);border-radius:4px;color:var(--tx);font-family:var(--font)}
+.sw-item .sw-rm{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--err);border:none;color:#fff;font-size:.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sw-add{width:40px;height:58px;border:2px dashed var(--bdr);border-radius:var(--r);background:transparent;color:var(--txm);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sw-add:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ═══ IMAGE UPLOAD ═══ */
+.img-field{display:flex;flex-direction:column;gap:.5rem}
+.img-input-row{display:flex;gap:.5rem;align-items:stretch}
+.img-input-row input{flex:1}
+.img-upload-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.6rem .9rem;background:var(--acc);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:.78rem;font-weight:500;white-space:nowrap;transition:background .2s;flex-shrink:0}
+.img-upload-btn:hover{background:var(--acch)}
+.img-upload-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+.img-preview{position:relative;display:inline-block;margin-top:.3rem}
+.img-preview img{max-width:180px;max-height:140px;border-radius:var(--r);border:2px solid var(--bdr);object-fit:cover}
+.img-preview .img-rm{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--err);border:none;color:#fff;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.img-preview .img-rm:hover{transform:scale(1.15)}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem;margin-top:.5rem}
+.gallery-thumb{position:relative;border-radius:var(--r);overflow:hidden;border:2px solid var(--bdr);aspect-ratio:1;background:var(--bg3)}
+.gallery-thumb img{width:100%;height:100%;object-fit:cover}
+.gallery-thumb .img-rm{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:var(--err);border:none;color:#fff;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.8;transition:opacity .15s}
+.gallery-thumb .img-rm:hover{opacity:1}
+.drop-zone{border:2px dashed var(--bdr);border-radius:var(--r);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;color:var(--txm);font-size:.8rem}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--acc);background:var(--accs);color:var(--acc)}
+.drop-zone svg{width:32px;height:32px;stroke:currentColor;fill:none;stroke-width:1.5;margin-bottom:.4rem}
+.img-warn{font-size:.6rem;color:var(--txm);margin-top:.2rem;font-style:italic}
+
+/* ═══ PREVIEW ═══ */
+.prev-box{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;height:60vh;position:relative;margin-top:1rem}
+.prev-bar{display:flex;align-items:center;justify-content:space-between;padding:.5rem .8rem;background:var(--bg);border-bottom:1px solid var(--bdr)}
+.prev-devs{display:flex;gap:.3rem}
+.prev-dev{padding:.3rem .55rem;background:transparent;border:1px solid var(--bdr);border-radius:6px;color:var(--txd);cursor:pointer;font-size:.65rem;font-family:var(--font);transition:all .15s}
+.prev-dev.on,.prev-dev:hover{background:var(--accs);border-color:var(--acc);color:var(--acc)}
+.prev-frame{width:100%;height:calc(100% - 40px);border:none;background:#fff;transition:max-width .3s;margin:0 auto;display:block}
+
+/* ═══ INVITATIONS LIST ═══ */
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.85rem;margin-top:1rem}
+.inv-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:1rem;transition:all .15s}
+.inv-card:hover{border-color:var(--txm)}
+.inv-card h3{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem}
+.inv-card .inv-meta{font-size:.7rem;color:var(--txm);margin:.3rem 0 .6rem}
+.inv-card .inv-acts{display:flex;gap:.3rem;flex-wrap:wrap}
+.inv-card .inv-acts .btn{padding:.3rem .5rem;font-size:.7rem}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:.65rem 1rem;font-size:.82rem;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:9999;transform:translateY(20px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:.4rem}
+.toast.show{transform:translateY(0);opacity:1}.toast.ok{border-left:3px solid var(--ok)}.toast.er{border-left:3px solid var(--err)}
+
+/* ═══ FINAL STEP EXTRAS ═══ */
+.final-actions{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1.5rem}
+@media(max-width:500px){.final-actions{grid-template-columns:1fr}}
+.final-btn{padding:1rem;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--tx);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font)}
+.final-btn:hover{border-color:var(--acc);transform:translateY(-2px)}
+.final-btn .fb-icon{font-size:1.8rem;margin-bottom:.3rem}
+.final-btn .fb-title{font-size:.9rem;font-weight:600}
+.final-btn .fb-desc{font-size:.7rem;color:var(--txm);margin-top:.2rem}
+.final-btn.primary{background:var(--acc);border-color:var(--acc)}.final-btn.primary:hover{background:var(--acch)}
+.final-btn.primary .fb-desc{color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body>
+
+<div class="editor">
+<div class="header">
+  <h1>💍 <span>Crea tu Invitación</span> de Boda</h1>
+  <p>Sigue los pasos para personalizar tu invitación perfecta</p>
+</div>
+
+<!-- STEPS BAR -->
+<div class="steps-bar">
+  <div class="steps-row" id="steps-row">
+    <div class="step-item active" data-s="0" onclick="goStep(0)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13.5" r="2.5"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="5" cy="13.5" r="2.5"/><circle cx="12" cy="19" r="2.5"/></svg></div>
+      <span class="step-label">Diseño</span>
+    </div>
+    <div class="step-item" data-s="1" onclick="goStep(1)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <span class="step-label">Novios</span>
+    </div>
+    <div class="step-item" data-s="2" onclick="goStep(2)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <span class="step-label">Evento</span>
+    </div>
+    <div class="step-item" data-s="3" onclick="goStep(3)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <span class="step-label">Detalles</span>
+    </div>
+    <div class="step-item" data-s="4" onclick="goStep(4)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <span class="step-label">Media</span>
+    </div>
+    <div class="step-item" data-s="5" onclick="goStep(5)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+      <span class="step-label">Regalos</span>
+    </div>
+    <div class="step-item" data-s="6" onclick="goStep(6)">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <span class="step-label">Final</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- STEP CONTENT -->
+<div class="step-content">
+
+<!-- ═══ STEP 0: DESIGN ═══ -->
+<div class="step active" id="s-0">
+  <div class="step-hd"><h2><span class="ico">🎨</span> Elige tu Diseño y Colores</h2><p>Selecciona el estilo visual que más te guste. Puedes personalizar los colores después.</p></div>
+  <div class="themes-carousel" id="themes-carousel"></div>
+  <p class="carousel-hint">Desliza para ver más diseños →</p>
+  <div style="margin-top:1.5rem">
+    <h3 style="font-size:.95rem;margin-bottom:.5rem;color:var(--txd)">Personalizar Colores (opcional)</h3>
+    <div class="colors-grid" id="custom-colors"></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 1: NOVIOS ═══ -->
+<div class="step" id="s-1">
+  <div class="step-hd"><h2><span class="ico">💕</span> Datos de los Novios</h2><p>Los nombres y la frase que aparecerán en la invitación</p></div>
+  <div class="fg">
+    <div class="fi"><label>Nombre de la Novia</label><input id="f-bride" placeholder="Georgia Contreras" oninput="uf('bride',this.value)"></div>
+    <div class="fi"><label>Nombre del Novio</label><input id="f-groom" placeholder="José Miguel Garcia" oninput="uf('groom',this.value)"></div>
+    <div class="fi ff"><label>Frase Romántica</label><textarea id="f-quote" rows="2" placeholder="Con la certeza de un amor bendecido por Dios..." oninput="uf('quote',this.value)"></textarea></div>
+    <hr class="fdiv">
+    <div class="fi ff"><label>Foto de Portada — Pantalla de Bienvenida</label>
+      <div class="img-field">
+        <div class="img-input-row">
+          <input id="f-coverPhoto" placeholder="URL o sube una foto desde tu celular" oninput="uf('coverPhoto',this.value)">
+          <button type="button" class="img-upload-btn" onclick="pickImg('coverPhoto')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Subir</button>
+        </div>
+        <div id="prev-coverPhoto"></div>
+        <span class="fhint">Sube desde tu celular o pega una URL. Aparece en la pantalla de bienvenida.</span>
+      </div>
+    </div>
+    <div class="fi ff"><label>Foto Principal — Debajo de Save the Date</label>
+      <div class="img-field">
+        <div class="img-input-row">
+          <input id="f-heroPhoto" placeholder="URL o sube una foto desde tu celular" oninput="uf('heroPhoto',this.value)">
+          <button type="button" class="img-upload-btn" onclick="pickImg('heroPhoto')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Subir</button>
+        </div>
+        <div id="prev-heroPhoto"></div>
+        <span class="fhint">Gran foto con animación elegante debajo de la fecha. Vacío = sin foto.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 2: EVENTO ═══ -->
+<div class="step" id="s-2">
+  <div class="step-hd"><h2><span class="ico">📅</span> Datos del Evento</h2><p>Fecha, hora y lugares de la ceremonia y recepción</p></div>
+  <div class="fg">
+    <div class="fi"><label>Fecha de la Boda</label><input type="date" id="f-weddingDate" oninput="uf('weddingDate',this.value)"></div>
+    <div class="fi"><label>Día de la Semana</label><input id="f-dayName" placeholder="Sábado" oninput="uf('dayName',this.value)"></div>
+    <div class="fi"><label>Número del Día</label><input id="f-dayNumber" placeholder="11" oninput="uf('dayNumber',this.value)"></div>
+    <div class="fi"><label>Mes</label><input id="f-month" placeholder="Abril" oninput="uf('month',this.value)"></div>
+    <div class="fi"><label>Año</label><input id="f-year" placeholder="2026" oninput="uf('year',this.value)"></div>
+    <hr class="fdiv">
+    <div class="fi ff" style="margin-bottom:.3rem"><h3 style="font-size:.95rem;color:var(--acc)">⛪ Ceremonia</h3></div>
+    <div class="fi"><label>Lugar</label><textarea id="f-ceremonyVenue" rows="2" placeholder="Iglesia..." oninput="uf('ceremonyVenue',this.value)"></textarea></div>
+    <div class="fi"><label>Dirección</label><input id="f-ceremonyAddress" oninput="uf('ceremonyAddress',this.value)"></div>
+    <div class="fi"><label>Hora</label><input id="f-ceremonyTime" placeholder="sábado, 11 de abril - 19:00" oninput="uf('ceremonyTime',this.value)"></div>
+    <div class="fi"><label>Google Maps URL</label><input id="f-ceremonyMapsUrl" oninput="uf('ceremonyMapsUrl',this.value)"></div>
+    <hr class="fdiv">
+    <div class="fi ff" style="margin-bottom:.3rem"><h3 style="font-size:.95rem;color:var(--acc)">🎉 Recepción / Fiesta</h3></div>
+    <div class="fi"><label>Lugar</label><textarea id="f-receptionVenue" rows="2" oninput="uf('receptionVenue',this.value)"></textarea></div>
+    <div class="fi"><label>Dirección</label><input id="f-receptionAddress" oninput="uf('receptionAddress',this.value)"></div>
+    <div class="fi"><label>Hora</label><input id="f-receptionTime" oninput="uf('receptionTime',this.value)"></div>
+    <div class="fi"><label>Google Maps URL</label><input id="f-receptionMapsUrl" oninput="uf('receptionMapsUrl',this.value)"></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: DETALLES ═══ -->
+<div class="step" id="s-3">
+  <div class="step-hd"><h2><span class="ico">✨</span> Detalles de la Boda</h2><p>Historia de amor, código de vestimenta y RSVP</p></div>
+  <h3 style="font-size:.95rem;color:var(--acc);margin-bottom:.75rem">📖 Nuestra Historia</h3>
+  <div id="tl-editor"></div>
+  <button class="btn btn-s" style="margin-bottom:1.5rem" onclick="addTL()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar Hito</button>
+  <hr class="fdiv" style="margin:1rem 0">
+  <h3 style="font-size:.95rem;color:var(--acc);margin-bottom:.75rem">👔 Código de Vestimenta</h3>
+  <div class="fg">
+    <div class="fi"><label>Tipo</label><input id="f-dresscode" placeholder="Formal Noche" oninput="uf('dresscode',this.value)"></div>
+    <div class="fi ff"><label>Descripción</label><textarea id="f-dresscodeDescription" rows="2" oninput="uf('dresscodeDescription',this.value)"></textarea></div>
+    <div class="fi ff"><label>Paleta de Colores</label><div class="sw-row" id="sw-editor"></div></div>
+  </div>
+  <hr class="fdiv" style="margin:1rem 0">
+  <h3 style="font-size:.95rem;color:var(--acc);margin-bottom:.75rem">✉️ Confirmación (RSVP)</h3>
+  <div class="fg">
+    <div class="fi"><label>Número WhatsApp (con código país)</label><input id="f-whatsappNumber" placeholder="56965636685" oninput="uf('whatsappNumber',this.value)"><span class="fhint">Sin + ni espacios. Ej: 56912345678. Al confirmar asistencia, se envía por WhatsApp.</span></div>
+    <div class="fi"><label>Email RSVP (respaldo)</label><input type="email" id="f-rsvpEmail" oninput="uf('rsvpEmail',this.value)"><span class="fhint">Solo se usa si no hay número de WhatsApp</span></div>
+    <div class="fi"><label>Google Form URL (opcional)</label><input id="f-googleFormUrl" oninput="uf('googleFormUrl',this.value)"><span class="fhint">Si lo pones, redirige al formulario en vez de WhatsApp/email</span></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 4: MEDIA ═══ -->
+<div class="step" id="s-4">
+  <div class="step-hd"><h2><span class="ico">📸</span> Fotos y Música</h2><p>Sube tus fotos desde el celular y agrega música</p></div>
+  <h3 style="font-size:.95rem;color:var(--acc);margin-bottom:.75rem">📷 Galería de Fotos</h3>
+  <div class="drop-zone" id="gallery-drop" onclick="pickGalleryImgs()">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    <div>Toca aquí para subir fotos o arrastra imágenes</div>
+    <div style="font-size:.65rem;margin-top:.3rem;opacity:.7">Acepta JPG, PNG, WebP — Se guardan en la invitación</div>
+  </div>
+  <div class="gallery-grid" id="gallery-editor"></div>
+  <p class="img-warn" id="gallery-warn" style="display:none"></p>
+  <hr class="fdiv" style="margin:1.5rem 0">
+  <div class="fg">
+    <div class="fi ff"><h3 style="font-size:.95rem;color:var(--acc)">🎵 Música de Fondo</h3></div>
+    <div class="fi ff"><label>URL del MP3</label><input id="f-musicUrl" placeholder="https://ejemplo.com/cancion.mp3" oninput="uf('musicUrl',this.value)"><span class="fhint">Se reproduce cuando el invitado elige "Ingresar con música". Vacío = sin música.</span></div>
+    <hr class="fdiv">
+    <div class="fi ff"><h3 style="font-size:.95rem;color:var(--acc)">🎶 Nuestra Canción</h3></div>
+    <div class="fi"><label>Título</label><input id="f-ourSong" placeholder="Perfect" oninput="uf('ourSong',this.value)"></div>
+    <div class="fi"><label>Artista</label><input id="f-ourSongArtist" placeholder="Ed Sheeran" oninput="uf('ourSongArtist',this.value)"></div>
+    <div class="fi ff"><label>Spotify Embed URL (opcional)</label><input id="f-spotifyUrl" oninput="uf('spotifyUrl',this.value)"><span class="fhint">URL de embed de Spotify para mostrar el reproductor</span></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 5: REGALOS ═══ -->
+<div class="step" id="s-5">
+  <div class="step-hd"><h2><span class="ico">🎁</span> Lista de Regalos</h2><p>Configura las opciones de regalo para los invitados</p></div>
+  <div id="gifts-editor"></div>
+  <button class="btn btn-s" style="margin-bottom:1rem" onclick="addGift()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Agregar Opción de Regalo</button>
+  <div class="fg">
+    <div class="fi ff"><label>Nota de Regalos</label><textarea id="f-giftsNote" rows="2" placeholder="Su presencia es nuestro mayor regalo..." oninput="uf('giftsNote',this.value)"></textarea><span class="fhint">Aparece debajo de las tarjetas de regalo</span></div>
+  </div>
+</div>
+
+<!-- ═══ STEP 6: FINAL ═══ -->
+<div class="step" id="s-6">
+  <div class="step-hd"><h2><span class="ico">✅</span> Toque Final y Descargar</h2><p>Mensaje de cierre, hashtag y descarga tu invitación</p></div>
+  <div class="fg">
+    <div class="fi ff"><label>Mensaje de Cierre</label><textarea id="f-closingMessage" rows="3" oninput="uf('closingMessage',this.value)" placeholder="Su presencia es el mejor regalo..."></textarea></div>
+    <div class="fi"><label>Hashtag</label><input id="f-hashtag" placeholder="#NovioYNovia2026" oninput="uf('hashtag',this.value)"></div>
+    <div class="fi"><label>Título para Calendario</label><input id="f-calendarTitle" oninput="uf('calendarTitle',this.value)" placeholder="Boda Georgia & José Miguel"></div>
+    <div class="fi ff"><label>Ubicación para Calendario</label><input id="f-calendarLocation" oninput="uf('calendarLocation',this.value)"></div>
+  </div>
+  <div class="final-actions">
+    <div class="final-btn" onclick="openPreview()">
+      <div class="fb-icon">👁️</div>
+      <div class="fb-title">Vista Previa</div>
+      <div class="fb-desc">Mira cómo se ve tu invitación</div>
+    </div>
+    <div class="final-btn primary" onclick="doExport()">
+      <div class="fb-icon">⬇️</div>
+      <div class="fb-title">Descargar HTML</div>
+      <div class="fb-desc">Descarga tu invitación lista para subir</div>
+    </div>
+  </div>
+  <div id="preview-container" style="display:none;margin-top:1.5rem">
+    <div class="prev-box">
+      <div class="prev-bar">
+        <div class="prev-devs">
+          <button class="prev-dev on" onclick="setDev(this,'100%')">Desktop</button>
+          <button class="prev-dev" onclick="setDev(this,'768px')">Tablet</button>
+          <button class="prev-dev" onclick="setDev(this,'375px')">Móvil</button>
+        </div>
+        <button class="btn btn-s" onclick="refreshPrev()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Actualizar</button>
+      </div>
+      <iframe id="prev-frame" class="prev-frame"></iframe>
+    </div>
+  </div>
+  <hr class="fdiv" style="margin:1.5rem 0">
+  <h3 style="font-size:.95rem;margin-bottom:.75rem;color:var(--txd)">Mis Invitaciones Guardadas</h3>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+    <button class="btn btn-p" onclick="newInv()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva Invitación</button>
+  </div>
+  <div class="inv-grid" id="inv-list"></div>
+</div>
+
+</div><!-- end step-content -->
+
+<!-- NAV BUTTONS -->
+<div class="nav-btns" id="nav-btns">
+  <button class="nav-btn-prev" id="btn-prev" onclick="prevStep()">Anterior</button>
+  <button class="nav-btn-next" id="btn-next" onclick="nextStep()">Siguiente</button>
+</div>
+
+</div><!-- end editor -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ THEMES ═══
+var THEMES=[
+{id:'dorado-clasico',name:'Dorado Clásico',desc:'Elegancia atemporal con tonos dorados',c:{bg:'#F9F4EE',bgWarm:'#F0E8DE',gold:'#C9A96E',goldLight:'#D4BA8A',goldDark:'#A8884E',text:'#1a1612',textSoft:'#4a4239',textMuted:'#8a7e72',blush:'#E8C4B8',blushLight:'#F2DDD6',sage:'#7A8C5E',sageDark:'#5C6B45',cream:'#EDE6DA',whiteSoft:'#FDFBF8'}},
+{id:'rosa-romantico',name:'Rosa Romántico',desc:'Suave y delicado, lleno de amor',c:{bg:'#FDF5F3',bgWarm:'#F8E8E4',gold:'#C4868C',goldLight:'#D4A0A5',goldDark:'#A86B70',text:'#2D1F20',textSoft:'#5A3E40',textMuted:'#9A7A7C',blush:'#E8A8AE',blushLight:'#F5D0D3',sage:'#C4868C',sageDark:'#A86B70',cream:'#F5E0DC',whiteSoft:'#FEFAF9'}},
+{id:'jardin-verde',name:'Jardín Verde',desc:'Fresco y natural como un jardín',c:{bg:'#F4F7F1',bgWarm:'#E8EDE2',gold:'#6B8E5A',goldLight:'#8DAE7A',goldDark:'#4D6B3E',text:'#1A2416',textSoft:'#3A4A35',textMuted:'#7A8A72',blush:'#C8D4B8',blushLight:'#DDE6D0',sage:'#6B8E5A',sageDark:'#4D6B3E',cream:'#DCE4D2',whiteSoft:'#FAFCF8'}},
+{id:'azul-serenidad',name:'Azul Serenidad',desc:'Tranquilo y sofisticado',c:{bg:'#F2F5FA',bgWarm:'#E4EAF4',gold:'#6882A8',goldLight:'#8DA4C4',goldDark:'#4A6488',text:'#1A2030',textSoft:'#3A4458',textMuted:'#7A8498',blush:'#B8C8E0',blushLight:'#D4DEF0',sage:'#6882A8',sageDark:'#4A6488',cream:'#D8E0EE',whiteSoft:'#F8FAFD'}},
+{id:'terracota',name:'Terracota',desc:'Cálido y rústico con tierra',c:{bg:'#FAF4EE',bgWarm:'#F2E6D8',gold:'#B87333',goldLight:'#D09050',goldDark:'#8C5520',text:'#2A1A10',textSoft:'#5A3E2A',textMuted:'#9A7E62',blush:'#E0B898',blushLight:'#F0D4BC',sage:'#8B7355',sageDark:'#6A5540',cream:'#EAD8C4',whiteSoft:'#FDF8F2'}},
+{id:'burdeos',name:'Burdeos Elegante',desc:'Intenso y lujoso',c:{bg:'#FBF5F3',bgWarm:'#F2E4E0',gold:'#8B2252',goldLight:'#A84070',goldDark:'#6A1A3E',text:'#1E0F14',textSoft:'#4A2838',textMuted:'#8A6878',blush:'#D4A0B0',blushLight:'#EAC8D2',sage:'#8B2252',sageDark:'#6A1A3E',cream:'#EEDCE0',whiteSoft:'#FEFAFC'}},
+{id:'lavanda',name:'Lavanda Soñador',desc:'Mágico y soñador',c:{bg:'#F6F3FA',bgWarm:'#EAE4F2',gold:'#8B72BE',goldLight:'#A890D4',goldDark:'#6A52A0',text:'#1A1424',textSoft:'#3A2E4A',textMuted:'#7A6E8A',blush:'#C4B0D8',blushLight:'#DED0EA',sage:'#8B72BE',sageDark:'#6A52A0',cream:'#DCD2EA',whiteSoft:'#FAF8FD'}},
+{id:'marmol-oscuro',name:'Mármol Oscuro',desc:'Moderno y minimalista',c:{bg:'#F5F5F5',bgWarm:'#EBEBEB',gold:'#2C2C2C',goldLight:'#555555',goldDark:'#111111',text:'#111111',textSoft:'#333333',textMuted:'#777777',blush:'#D4D4D4',blushLight:'#E8E8E8',sage:'#2C2C2C',sageDark:'#111111',cream:'#E0E0E0',whiteSoft:'#FAFAFA'}},
+{id:'sunset',name:'Atardecer',desc:'Tonos cálidos de puesta de sol',c:{bg:'#FFF8F0',bgWarm:'#FFE8D6',gold:'#D4764E',goldLight:'#E8946A',goldDark:'#B85A32',text:'#2A1810',textSoft:'#5A3828',textMuted:'#9A7862',blush:'#FFCBA4',blushLight:'#FFE0C8',sage:'#D4764E',sageDark:'#B85A32',cream:'#FFD8BC',whiteSoft:'#FFFAF5'}}
+];
+
+// ═══ STATE ═══
+var invs=JSON.parse(localStorage.getItem('wed_invs')||'[]');
+var curId=null;
+var templateHTML='';
+var curStep=0;
+var TOTAL_STEPS=7;
+
+// ═══ INIT ═══
+document.addEventListener('DOMContentLoaded',function(){
+  loadTemplate();
+  // Auto-create or load existing invitation
+  if(invs.length>0){
+    curId=invs[invs.length-1].id;
+  } else {
+    newInv(true);
+  }
+  loadForm();
+  updateSteps();
+});
+
+function loadTemplate(){
+  fetch('index.html').then(function(r){return r.text()}).then(function(t){
+    templateHTML=t;
+  }).catch(function(){
+    toast('No se encontró index.html. Asegúrate de que esté en la misma carpeta.','er');
+  });
+}
+
+// ═══ WIZARD NAVIGATION ═══
+function goStep(n){
+  curStep=n;
+  updateSteps();
+}
+function nextStep(){
+  if(curStep<TOTAL_STEPS-1){curStep++;updateSteps();window.scrollTo({top:0,behavior:'smooth'})}
+}
+function prevStep(){
+  if(curStep>0){curStep--;updateSteps();window.scrollTo({top:0,behavior:'smooth'})}
+}
+function updateSteps(){
+  // Update step items
+  document.querySelectorAll('.step-item').forEach(function(el,i){
+    el.classList.remove('active','done');
+    if(i===curStep) el.classList.add('active');
+    else if(i<curStep) el.classList.add('done');
+  });
+  // Progress bar
+  var pct=curStep/(TOTAL_STEPS-1)*100;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  // Show/hide steps
+  document.querySelectorAll('.step').forEach(function(el,i){
+    el.classList.toggle('active',i===curStep);
+  });
+  // Nav buttons
+  document.getElementById('btn-prev').style.visibility=curStep===0?'hidden':'visible';
+  var nextBtn=document.getElementById('btn-next');
+  if(curStep===TOTAL_STEPS-1){
+    nextBtn.textContent='Descargar Invitación';
+    nextBtn.onclick=function(){doExport()};
+  } else {
+    nextBtn.textContent='Siguiente';
+    nextBtn.onclick=function(){nextStep()};
+  }
+  // Render dynamic content
+  if(curStep===0) renderThemes();
+  if(curStep===3){renderTL();renderSW();}
+  if(curStep===5) renderGiftsEditor();
+  if(curStep===6) renderInvs();
+}
+
+// ═══ DEFAULT CONFIG ═══
+function defCfg(){
+  return {
+    coverPhoto:'',heroPhoto:'',musicUrl:'',
+    bride:'',groom:'',weddingDate:'',dayName:'',dayNumber:'',month:'',year:'',
+    quote:'"Con la certeza de un amor bendecido por Dios."',
+    ceremonyVenue:'',ceremonyAddress:'',ceremonyTime:'',ceremonyMapsUrl:'',
+    receptionVenue:'',receptionAddress:'',receptionTime:'',receptionMapsUrl:'',
+    timeline:[
+      {date:'',title:'Nos Conocimos',text:'',icon:'heart'},
+      {date:'',title:'Nuestro Reencuentro',text:'',icon:'coffee'},
+      {date:'',title:'La Propuesta',text:'',icon:'ring'},
+      {date:'',title:'Nuestra Boda',text:'',icon:'church'}
+    ],
+    photos:[],rsvpEmail:'',whatsappNumber:'56965636685',googleFormUrl:'',
+    ourSong:'Perfect',ourSongArtist:'Ed Sheeran',spotifyUrl:'',
+    dresscode:'Formal Noche',
+    dresscodeDescription:'Te invitamos a vestir de manera elegante y formal de noche. Para ellas sugerimos rosa pastel. Por favor evitar el color blanco, reservado para la novia.',
+    dresscodeColors:[{color:'#F4C2C2',name:'Rosa Pastel'},{color:'#C9A96E',name:'Dorado'},{color:'#1a1612',name:'Negro'}],
+    gifts:[{icon:'envelope',title:'Sobre de Corazón',description:'En la recepción se recibirán sobres como aporte de corazón. Su cariño y presencia son nuestro mayor regalo.'}],
+    giftsNote:'Su presencia es nuestro mayor regalo. Si desean contribuir, agradecemos su gesto de corazón.',
+    closingMessage:'Su presencia es el mejor regalo que podemos recibir.',
+    hashtag:'',calendarTitle:'',calendarLocation:'',
+    theme:'dorado-clasico',themeColors:null
+  };
+}
+function getCfg(){if(!curId)return null;var inv=invs.find(function(i){return i.id===curId});return inv?inv.config:null}
+function save(){localStorage.setItem('wed_invs',JSON.stringify(invs))}
+
+// ═══ INVITATIONS CRUD ═══
+function newInv(silent){
+  var id='inv_'+Date.now();
+  invs.push({id:id,name:'Invitación '+(invs.length+1),config:defCfg()});
+  save();curId=id;loadForm();
+  if(!silent){toast('Nueva invitación creada','ok');renderInvs();}
+}
+function editInv(id){curId=id;loadForm();goStep(0);toast('Editando invitación','ok')}
+function dupInv(id){
+  var s=invs.find(function(i){return i.id===id});if(!s)return;
+  invs.push({id:'inv_'+Date.now(),name:s.name+' (copia)',config:JSON.parse(JSON.stringify(s.config))});
+  save();renderInvs();toast('Duplicada','ok');
+}
+function delInv(id){
+  if(!confirm('¿Eliminar esta invitación?'))return;
+  invs=invs.filter(function(i){return i.id!==id});
+  if(curId===id){curId=invs.length?invs[0].id:null;if(!curId)newInv(true);}
+  save();loadForm();renderInvs();toast('Eliminada','ok');
+}
+function renInv(id){
+  var inv=invs.find(function(i){return i.id===id});if(!inv)return;
+  var n=prompt('Nuevo nombre:',inv.name);if(n&&n.trim()){inv.name=n.trim();save();renderInvs();}
+}
+
+function renderInvs(){
+  var el=document.getElementById('inv-list');
+  if(!invs.length){el.innerHTML='<p style="color:var(--txm);font-size:.85rem">No hay invitaciones guardadas.</p>';return;}
+  el.innerHTML=invs.map(function(inv){
+    var c=inv.config;var names=(c.bride&&c.groom)?esc(c.bride)+' & '+esc(c.groom):'Sin nombres';
+    var act=inv.id===curId;
+    return '<div class="inv-card" style="'+(act?'border-color:var(--acc)':'')+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:start">'
+      +'<div><h3>'+names+'</h3><p style="font-size:.7rem;color:var(--txd);margin-top:.1rem">'+esc(inv.name)+'</p></div>'
+      +(act?'<span style="font-size:.55rem;background:var(--acc);color:#fff;padding:.1rem .4rem;border-radius:8px">Actual</span>':'')
+      +'</div>'
+      +'<p class="inv-meta">📅 '+(c.weddingDate||'Sin fecha')+'</p>'
+      +'<div class="inv-acts">'
+      +'<button class="btn btn-p" onclick="editInv(\''+inv.id+'\')">Editar</button>'
+      +'<button class="btn btn-s" onclick="expOne(\''+inv.id+'\')">Descargar</button>'
+      +'<button class="btn btn-s" onclick="dupInv(\''+inv.id+'\')">Duplicar</button>'
+      +'<button class="btn btn-s" onclick="renInv(\''+inv.id+'\')">Renombrar</button>'
+      +'<button class="btn btn-d" onclick="delInv(\''+inv.id+'\')">✕</button>'
+      +'</div></div>'
+  }).join('');
+}
+
+// ═══ FORM ↔ CONFIG ═══
+function uf(f,v){var c=getCfg();if(!c)return;c[f]=v;save();if(f==='coverPhoto'||f==='heroPhoto')showImgPreview(f,v)}
+function loadForm(){
+  var c=getCfg();if(!c)return;
+  var fields='bride,groom,quote,coverPhoto,heroPhoto,musicUrl,weddingDate,dayName,dayNumber,month,year,ceremonyVenue,ceremonyAddress,ceremonyTime,ceremonyMapsUrl,receptionVenue,receptionAddress,receptionTime,receptionMapsUrl,whatsappNumber,rsvpEmail,googleFormUrl,ourSong,ourSongArtist,spotifyUrl,dresscode,dresscodeDescription,giftsNote,closingMessage,hashtag,calendarTitle,calendarLocation'.split(',');
+  fields.forEach(function(f){
+    var el=document.getElementById('f-'+f);
+    if(el){
+      var v=c[f]||'';
+      // For image fields with base64 data, show friendly text
+      if((f==='coverPhoto'||f==='heroPhoto')&&v.startsWith('data:')){
+        el.value='[Imagen subida]';
+      } else {
+        el.value=v;
+      }
+    }
+  });
+  loadImgPreviews();
+}
+
+// ═══ IMAGE UPLOAD ═══
+// Hidden file input reused for all uploads
+var _fileInput=document.createElement('input');
+_fileInput.type='file';
+_fileInput.accept='image/jpeg,image/png,image/webp,image/gif';
+_fileInput.style.display='none';
+document.body.appendChild(_fileInput);
+
+var _multiFileInput=document.createElement('input');
+_multiFileInput.type='file';
+_multiFileInput.accept='image/jpeg,image/png,image/webp,image/gif';
+_multiFileInput.multiple=true;
+_multiFileInput.style.display='none';
+document.body.appendChild(_multiFileInput);
+
+// Compress and convert image file to base64 data URL
+function fileToBase64(file,maxW,cb){
+  maxW=maxW||800;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
+      var canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      var quality=0.75;
+      var dataUrl=canvas.toDataURL('image/jpeg',quality);
+      // If still too large (>500KB), reduce quality
+      if(dataUrl.length>500000){
+        dataUrl=canvas.toDataURL('image/jpeg',0.5);
+      }
+      cb(dataUrl);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Pick image for a single field (coverPhoto, heroPhoto)
+function pickImg(field){
+  _fileInput.onchange=function(){
+    var file=_fileInput.files[0];
+    if(!file)return;
+    toast('Procesando imagen...','ok');
+    fileToBase64(file,1200,function(dataUrl){
+      var c=getCfg();if(!c)return;
+      c[field]=dataUrl;
+      save();
+      var inp=document.getElementById('f-'+field);
+      if(inp)inp.value='[Imagen subida]';
+      showImgPreview(field,dataUrl);
+      toast('Foto cargada correctamente','ok');
+    });
+    _fileInput.value='';
+  };
+  _fileInput.click();
+}
+
+// Show preview for single image field
+function showImgPreview(field,src){
+  var container=document.getElementById('prev-'+field);
+  if(!container)return;
+  if(!src||src===''){container.innerHTML='';return;}
+  container.innerHTML='<div class="img-preview"><img src="'+src+'" alt="Vista previa"><button class="img-rm" onclick="clearImg(\''+field+'\')">&times;</button></div>';
+}
+
+// Clear single image field
+function clearImg(field){
+  var c=getCfg();if(!c)return;
+  c[field]='';save();
+  var inp=document.getElementById('f-'+field);
+  if(inp)inp.value='';
+  showImgPreview(field,'');
+  toast('Foto eliminada','ok');
+}
+
+// Pick multiple images for gallery
+function pickGalleryImgs(){
+  _multiFileInput.onchange=function(){
+    var files=_multiFileInput.files;
+    if(!files.length)return;
+    var c=getCfg();if(!c)return;
+    if(!c.photos)c.photos=[];
+    var count=files.length;
+    var done=0;
+    toast('Procesando '+count+' imagen(es)...','ok');
+    for(var i=0;i<files.length;i++){
+      (function(file){
+        fileToBase64(file,800,function(dataUrl){
+          c.photos.push(dataUrl);
+          done++;
+          if(done===count){
+            save();
+            renderGalleryEditor();
+            toast(count+' foto(s) agregada(s)','ok');
+            checkGallerySize();
+          }
+        });
+      })(files[i]);
+    }
+    _multiFileInput.value='';
+  };
+  _multiFileInput.click();
+}
+
+// Remove gallery photo by index
+function rmPhoto(i){
+  var c=getCfg();if(!c)return;
+  if(!c.photos)return;
+  c.photos.splice(i,1);
+  save();
+  renderGalleryEditor();
+}
+
+// Render gallery editor thumbnails
+function renderGalleryEditor(){
+  var c=getCfg();if(!c)return;
+  if(!c.photos)c.photos=[];
+  var el=document.getElementById('gallery-editor');
+  if(!el)return;
+  el.innerHTML=c.photos.map(function(src,i){
+    return '<div class="gallery-thumb"><img src="'+src+'" alt="Foto '+(i+1)+'"><button class="img-rm" onclick="rmPhoto('+i+')">&times;</button></div>';
+  }).join('');
+}
+
+// Warn if gallery data is getting large
+function checkGallerySize(){
+  var c=getCfg();if(!c)return;
+  var warn=document.getElementById('gallery-warn');
+  if(!warn)return;
+  var total=JSON.stringify(c.photos||[]).length;
+  if(total>3000000){
+    warn.style.display='block';
+    warn.textContent='Las fotos ocupan mucho espacio ('+Math.round(total/1024/1024)+' MB). Considera usar menos fotos o de menor resolución.';
+  } else {
+    warn.style.display='none';
+  }
+}
+
+// Drag and drop support for gallery
+(function(){
+  document.addEventListener('DOMContentLoaded',function(){
+    var drop=document.getElementById('gallery-drop');
+    if(!drop)return;
+    drop.addEventListener('dragover',function(e){e.preventDefault();e.stopPropagation();drop.classList.add('dragover')});
+    drop.addEventListener('dragleave',function(e){e.preventDefault();e.stopPropagation();drop.classList.remove('dragover')});
+    drop.addEventListener('drop',function(e){
+      e.preventDefault();e.stopPropagation();drop.classList.remove('dragover');
+      var files=e.dataTransfer.files;if(!files.length)return;
+      var c=getCfg();if(!c)return;
+      if(!c.photos)c.photos=[];
+      var imgFiles=[];
+      for(var i=0;i<files.length;i++){
+        if(files[i].type.startsWith('image/'))imgFiles.push(files[i]);
+      }
+      if(!imgFiles.length){toast('Solo se aceptan imágenes','err');return;}
+      var count=imgFiles.length,done=0;
+      toast('Procesando '+count+' imagen(es)...','ok');
+      imgFiles.forEach(function(file){
+        fileToBase64(file,800,function(dataUrl){
+          c.photos.push(dataUrl);
+          done++;
+          if(done===count){save();renderGalleryEditor();toast(count+' foto(s) agregada(s)','ok');checkGallerySize();}
+        });
+      });
+    });
+  });
+})();
+
+// Load image previews when form loads
+function loadImgPreviews(){
+  var c=getCfg();if(!c)return;
+  if(c.coverPhoto){
+    showImgPreview('coverPhoto',c.coverPhoto);
+    var ci=document.getElementById('f-coverPhoto');
+    if(ci&&c.coverPhoto.startsWith('data:'))ci.value='[Imagen subida]';
+  }
+  if(c.heroPhoto){
+    showImgPreview('heroPhoto',c.heroPhoto);
+    var hi=document.getElementById('f-heroPhoto');
+    if(hi&&c.heroPhoto.startsWith('data:'))hi.value='[Imagen subida]';
+  }
+  renderGalleryEditor();
+}
+
+// ═══ TIMELINE EDITOR ═══
+function renderTL(){
+  var c=getCfg();if(!c)return;
+  document.getElementById('tl-editor').innerHTML=c.timeline.map(function(item,i){
+    return '<div class="edit-item"><span class="item-num">'+(i+1)+'</span><button class="item-rm" onclick="rmTL('+i+')">&times;</button><div class="fg">'
+      +'<div class="fi"><label>Fecha</label><input value="'+ea(item.date)+'" oninput="utl('+i+',\'date\',this.value)" placeholder="Marzo 2018"></div>'
+      +'<div class="fi"><label>Título</label><input value="'+ea(item.title)+'" oninput="utl('+i+',\'title\',this.value)"></div>'
+      +'<div class="fi"><label>Icono</label><select onchange="utl('+i+',\'icon\',this.value)">'
+      +'<option value="heart"'+(item.icon==='heart'?' selected':'')+'>❤️ Corazón</option>'
+      +'<option value="coffee"'+(item.icon==='coffee'?' selected':'')+'>☕ Reencuentro</option>'
+      +'<option value="ring"'+(item.icon==='ring'?' selected':'')+'>💍 Anillo</option>'
+      +'<option value="church"'+(item.icon==='church'?' selected':'')+'>⛪ Iglesia</option></select></div>'
+      +'<div class="fi ff"><label>Descripción</label><textarea rows="2" oninput="utl('+i+',\'text\',this.value)">'+esc(item.text)+'</textarea></div>'
+      +'</div></div>'
+  }).join('');
+}
+function utl(i,f,v){var c=getCfg();if(!c)return;c.timeline[i][f]=v;save()}
+function addTL(){var c=getCfg();if(!c)return;c.timeline.push({date:'',title:'',text:'',icon:'heart'});save();renderTL()}
+function rmTL(i){var c=getCfg();if(!c)return;c.timeline.splice(i,1);save();renderTL()}
+
+// ═══ SWATCH EDITOR ═══
+function renderSW(){
+  var c=getCfg();if(!c)return;
+  document.getElementById('sw-editor').innerHTML=c.dresscodeColors.map(function(s,i){
+    return '<div class="sw-item"><button class="sw-rm" onclick="rmSW('+i+')">&times;</button>'
+      +'<input type="color" value="'+s.color+'" oninput="usw('+i+',\'color\',this.value)">'
+      +'<input type="text" value="'+ea(s.name)+'" oninput="usw('+i+',\'name\',this.value)"></div>'
+  }).join('')+'<button class="sw-add" onclick="addSW()">+</button>';
+}
+function usw(i,f,v){var c=getCfg();if(!c)return;c.dresscodeColors[i][f]=v;save()}
+function addSW(){var c=getCfg();if(!c)return;c.dresscodeColors.push({color:'#C9A96E',name:'Nuevo'});save();renderSW()}
+function rmSW(i){var c=getCfg();if(!c)return;c.dresscodeColors.splice(i,1);save();renderSW()}
+
+// ═══ GIFTS EDITOR ═══
+function renderGiftsEditor(){
+  var c=getCfg();if(!c)return;
+  if(!c.gifts)c.gifts=[];
+  document.getElementById('gifts-editor').innerHTML=c.gifts.map(function(g,i){
+    return '<div class="edit-item"><span class="item-num">'+(i+1)+'</span><button class="item-rm" onclick="rmGift('+i+')">&times;</button><div class="fg">'
+      +'<div class="fi"><label>Icono</label><select onchange="ugift('+i+',\'icon\',this.value)">'
+      +'<option value="envelope"'+(g.icon==='envelope'?' selected':'')+'>✉️ Sobre</option>'
+      +'<option value="gift"'+(g.icon==='gift'?' selected':'')+'>🎁 Regalo</option>'
+      +'<option value="heart"'+(g.icon==='heart'?' selected':'')+'>❤️ Corazón</option>'
+      +'<option value="money"'+(g.icon==='money'?' selected':'')+'>💵 Dinero</option></select></div>'
+      +'<div class="fi"><label>Título</label><input value="'+ea(g.title)+'" oninput="ugift('+i+',\'title\',this.value)"></div>'
+      +'<div class="fi ff"><label>Descripción</label><textarea rows="2" oninput="ugift('+i+',\'description\',this.value)">'+esc(g.description||'')+'</textarea></div>'
+      +'</div></div>'
+  }).join('');
+}
+function ugift(i,f,v){var c=getCfg();if(!c)return;c.gifts[i][f]=v;save()}
+function addGift(){var c=getCfg();if(!c)return;c.gifts.push({icon:'envelope',title:'',description:''});save();renderGiftsEditor()}
+function rmGift(i){var c=getCfg();if(!c)return;c.gifts.splice(i,1);save();renderGiftsEditor()}
+
+// ═══ THEMES ═══
+// Per-theme FORMAT styles for phone mockup cards
+var THEME_FORMATS={
+  'dorado-clasico':{br:'8px',nameStyle:'font-style:italic;font-weight:300',dateStyle:'border:1px solid;padding:2px 6px',btnR:'4px',decor:'floral'},
+  'rosa-romantico':{br:'24px',nameStyle:'font-style:italic;font-weight:400;font-size:1.25rem',dateStyle:'background:rgba(255,255,255,.5);border-radius:50px;padding:4px 10px;border:2px solid',btnR:'50px',decor:'hearts'},
+  'jardin-verde':{br:'2px',nameStyle:'font-style:italic;font-weight:400',dateStyle:'border-left:3px solid;padding:2px 6px',btnR:'2px',decor:'leaves'},
+  'azul-serenidad':{br:'0',nameStyle:'font-style:normal;font-weight:300;text-transform:uppercase;font-size:.85rem;letter-spacing:.1em;font-family:Inter,sans-serif',dateStyle:'border:1px solid;padding:3px 8px',btnR:'0',decor:'lines'},
+  'terracota':{br:'12px',nameStyle:'font-style:italic;font-weight:300',dateStyle:'border-radius:50px 50px 4px 4px;border:2px solid;padding:4px 8px;background:rgba(255,255,255,.3)',btnR:'8px',decor:'arch'},
+  'burdeos':{br:'0',nameStyle:'font-style:italic;font-weight:400;letter-spacing:.03em',dateStyle:'border:2px solid;padding:4px 10px;position:relative',btnR:'0',decor:'deco'},
+  'lavanda':{br:'20px',nameStyle:'font-style:italic;font-weight:300;text-shadow:0 2px 8px rgba(139,114,190,.2)',dateStyle:'background:rgba(255,255,255,.4);border-radius:14px;padding:4px 10px;backdrop-filter:blur(4px)',btnR:'14px',decor:'clouds'},
+  'marmol-oscuro':{br:'0',nameStyle:'font-style:normal;font-weight:200;text-transform:uppercase;letter-spacing:.12em;font-family:Inter,sans-serif;color:#FFF',dateStyle:'border:1px solid #555;padding:3px 8px',btnR:'0',decor:'minimal'},
+  'sunset':{br:'16px',nameStyle:'font-style:italic;font-weight:400',dateStyle:'background:linear-gradient(135deg,rgba(255,200,160,.3),rgba(255,220,190,.3));border-radius:12px;padding:4px 10px',btnR:'12px',decor:'gradient'}
+};
+
+function thmDecor(id,c){
+  var f=THEME_FORMATS[id]||THEME_FORMATS['dorado-clasico'];
+  if(f.decor==='floral') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="30" rx="25" ry="12" fill="'+c.blush+'" opacity=".4" transform="rotate(-30 30 30)"/><ellipse cx="30" cy="30" rx="25" ry="12" fill="'+c.blushLight+'" opacity=".35" transform="rotate(25 30 30)"/><circle cx="30" cy="30" r="5" fill="'+c.gold+'" opacity=".3"/></svg>';
+  if(f.decor==='hearts') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M30 40 C30 30 15 25 15 35 C15 48 30 55 30 55 C30 55 45 48 45 35 C45 25 30 30 30 40Z" fill="'+c.blush+'" opacity=".25"/><path d="M70 25 C70 18 60 15 60 22 C60 30 70 35 70 35 C70 35 80 30 80 22 C80 15 70 18 70 25Z" fill="'+c.blushLight+'" opacity=".2"/></svg>';
+  if(f.decor==='leaves') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 50 Q35 20 60 30 Q35 35 20 50Z" fill="'+c.sage+'" opacity=".3"/><path d="M50 70 Q70 45 85 55 Q68 55 50 70Z" fill="'+c.sage+'" opacity=".2"/><path d="M10 80 Q25 60 40 65 Q25 67 10 80Z" fill="'+c.sage+'" opacity=".15"/></svg>';
+  if(f.decor==='lines') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="15" x2="40" y2="15" stroke="'+c.gold+'" stroke-width=".5" opacity=".3"/><line x1="60" y1="15" x2="90" y2="15" stroke="'+c.gold+'" stroke-width=".5" opacity=".3"/><line x1="10" y1="85" x2="40" y2="85" stroke="'+c.gold+'" stroke-width=".5" opacity=".2"/><line x1="60" y1="85" x2="90" y2="85" stroke="'+c.gold+'" stroke-width=".5" opacity=".2"/></svg>';
+  if(f.decor==='arch') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M20 90 Q20 20 50 15 Q80 20 80 90" fill="none" stroke="'+c.gold+'" stroke-width="1" opacity=".15"/></svg>';
+  if(f.decor==='deco') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="84" height="84" fill="none" stroke="'+c.gold+'" stroke-width=".6" opacity=".2"/><rect x="12" y="12" width="76" height="76" fill="none" stroke="'+c.goldLight+'" stroke-width=".4" opacity=".15"/></svg>';
+  if(f.decor==='clouds') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="20" rx="25" ry="12" fill="'+c.blush+'" opacity=".15"/><ellipse cx="70" cy="15" rx="20" ry="10" fill="'+c.blushLight+'" opacity=".1"/><ellipse cx="50" cy="85" rx="30" ry="10" fill="'+c.blush+'" opacity=".1"/></svg>';
+  if(f.decor==='minimal') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="30" y1="25" x2="70" y2="25" stroke="#555" stroke-width=".5" opacity=".3"/><line x1="30" y1="75" x2="70" y2="75" stroke="#555" stroke-width=".5" opacity=".3"/></svg>';
+  if(f.decor==='gradient') return '<svg class="thm-floral" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="sg'+id+'"><stop offset="0%" stop-color="'+c.gold+'" stop-opacity=".15"/><stop offset="100%" stop-color="'+c.blush+'" stop-opacity="0"/></radialGradient></defs><circle cx="20" cy="20" r="30" fill="url(#sg'+id+')"/><circle cx="80" cy="80" r="25" fill="url(#sg'+id+')"/></svg>';
+  return '';
+}
+
+function renderThemes(){
+  var c=getCfg();if(!c)return;
+  var cur=c.theme||'dorado-clasico';
+  var bride=c.bride||'Georgia';
+  var groom=c.groom||'José';
+  var bFirst=bride.split(' ')[0];
+  var gFirst=groom.split(' ')[0];
+  document.getElementById('themes-carousel').innerHTML=THEMES.map(function(t){
+    var fmt=THEME_FORMATS[t.id]||THEME_FORMATS['dorado-clasico'];
+    var isDark=t.id==='marmol-oscuro';
+    var bgCol=isDark?'#111':t.c.bg;
+    var txtCol=isDark?'#FFF':t.c.goldDark;
+    var subCol=isDark?'#888':t.c.textMuted;
+    var quoteCol=isDark?'#666':t.c.textSoft;
+    return '<div class="thm-card'+(t.id===cur?' sel':'')+'" onclick="selTheme(\''+t.id+'\')">'
+      +'<div class="thm-phone"><div class="thm-phone-frame" style="border-radius:'+fmt.br+'"><div class="thm-phone-screen" style="background:'+bgCol+';color:'+t.c.text+';border-radius:'+fmt.br+'">'
+      +thmDecor(t.id,t.c)
+      +'<span class="thm-std" style="color:'+subCol+'">Save the Date</span>'
+      +'<div class="thm-names" style="color:'+txtCol+';'+fmt.nameStyle+'">'+esc(bFirst)+'<span class="thm-amp" style="color:'+t.c.gold+'">&amp;</span>'+esc(gFirst)+'</div>'
+      +'<p class="thm-quote" style="color:'+quoteCol+'">Con la certeza de un amor</p>'
+      +'<div class="thm-date" style="color:'+subCol+';'+fmt.dateStyle+';border-color:'+t.c.gold+'"><span>SÁB</span><span class="thm-date-num" style="color:'+txtCol+';border-color:'+t.c.gold+'">11</span><span>ABR</span></div>'
+      +'<div style="margin-top:auto;padding-top:.3rem"><div style="display:inline-block;padding:2px 8px;border-radius:'+fmt.btnR+';background:'+t.c.sage+';color:#fff;font-size:.25rem;letter-spacing:.05em">CONFIRMAR</div></div>'
+      +'</div></div></div>'
+      +'<div class="thm-info"><p class="thm-name">'+t.name+'</p><p class="thm-desc">'+t.desc+'</p><div class="thm-dots">'
+      +'<span class="thm-dot" style="background:'+t.c.gold+'"></span>'
+      +'<span class="thm-dot" style="background:'+t.c.blush+'"></span>'
+      +'<span class="thm-dot" style="background:'+t.c.sage+'"></span>'
+      +'<span class="thm-dot" style="background:'+bgCol+';border:1px solid '+(isDark?'#444':'rgba(0,0,0,.1)')+'"></span>'
+      +'</div></div></div>'
+  }).join('');
+  renderCustomColors();
+}
+function selTheme(id){
+  var c=getCfg();if(!c)return;c.theme=id;c.themeColors=null;save();
+  renderThemes();loadThemeColors(c);
+  toast('Tema: '+THEMES.find(function(t){return t.id===id}).name,'ok');
+}
+
+var colorFields=[['bg','Fondo'],['bgWarm','Fondo Cálido'],['gold','Acento Principal'],['text','Texto'],['blush','Rosa/Blush'],['sage','Botones']];
+function renderCustomColors(){
+  document.getElementById('custom-colors').innerHTML=colorFields.map(function(f){
+    return '<div class="color-item">'
+      +'<input type="color" id="tc-'+f[0]+'" oninput="utc(\''+f[0]+'\',this.value)">'
+      +'<div class="color-info"><div class="color-name">'+f[1]+'</div><div class="color-hex" id="th-'+f[0]+'"></div></div></div>'
+  }).join('');
+  var c=getCfg();if(c)loadThemeColors(c);
+}
+function loadThemeColors(c){
+  var t=THEMES.find(function(t){return t.id===c.theme})||THEMES[0];
+  var cols=c.themeColors||t.c;
+  colorFields.forEach(function(f){
+    var ci=document.getElementById('tc-'+f[0]);var hi=document.getElementById('th-'+f[0]);
+    if(ci)ci.value=cols[f[0]]||'';if(hi)hi.textContent=cols[f[0]]||'';
+  });
+}
+function utc(f,v){
+  var c=getCfg();if(!c)return;
+  var t=THEMES.find(function(t){return t.id===c.theme})||THEMES[0];
+  if(!c.themeColors)c.themeColors=JSON.parse(JSON.stringify(t.c));
+  c.themeColors[f]=v;
+  var hi=document.getElementById('th-'+f);if(hi)hi.textContent=v;
+  save();
+}
+
+// ═══ PREVIEW ═══
+function openPreview(){
+  var el=document.getElementById('preview-container');
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='block') refreshPrev();
+}
+function refreshPrev(){
+  var c=getCfg();
+  if(!c){toast('Crea una invitación primero','er');return;}
+  if(!templateHTML){toast('Cargando plantilla...','er');loadTemplate();return;}
+  var html=buildHTML(c);
+  var frame=document.getElementById('prev-frame');
+  var blob=new Blob([html],{type:'text/html'});
+  frame.src=URL.createObjectURL(blob);
+}
+function setDev(btn,w){
+  document.querySelectorAll('.prev-dev').forEach(function(b){b.classList.remove('on')});
+  btn.classList.add('on');document.getElementById('prev-frame').style.maxWidth=w;
+}
+
+// ═══ EXPORT ═══
+function doExport(){
+  var c=getCfg();
+  if(!c){toast('Crea una invitación primero','er');return;}
+  if(!templateHTML){toast('Cargando plantilla, intenta de nuevo...','er');loadTemplate();return;}
+  var inv=invs.find(function(i){return i.id===curId});
+  var fname=(inv.name||'invitacion').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.html';
+  dl(buildHTML(c),fname);toast('¡Descargada: '+fname+'!','ok');
+}
+function expOne(id){
+  var inv=invs.find(function(i){return i.id===id});if(!inv)return;
+  if(!templateHTML){toast('Cargando plantilla...','er');loadTemplate();return;}
+  var fname=(inv.name||'invitacion').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.html';
+  dl(buildHTML(inv.config),fname);toast('¡Descargada: '+fname+'!','ok');
+}
+function dl(html,fname){
+  var b=new Blob([html],{type:'text/html;charset=utf-8'});
+  var u=URL.createObjectURL(b);var a=document.createElement('a');
+  a.href=u;a.download=fname;a.click();URL.revokeObjectURL(u);
+}
+
+// ═══ BUILD HTML ═══
+function buildHTML(cfg){
+  var html=templateHTML;
+  var t=THEMES.find(function(t){return t.id===cfg.theme})||THEMES[0];
+  var c=cfg.themeColors||t.c;
+  var colorMap={
+    '--color-bg:':c.bg,'--color-bg-warm:':c.bgWarm,
+    '--color-gold:':c.gold,'--color-gold-light:':c.goldLight,'--color-gold-dark:':c.goldDark,
+    '--color-text:':c.text,'--color-text-soft:':c.textSoft,'--color-text-muted:':c.textMuted,
+    '--color-blush:':c.blush,'--color-blush-light:':c.blushLight,
+    '--color-sage:':c.sage,'--color-sage-dark:':c.sageDark,
+    '--color-cream:':c.cream,'--color-white-soft:':c.whiteSoft
+  };
+  for(var prop in colorMap){
+    if(colorMap[prop]){
+      var re=new RegExp(prop.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*#[A-Fa-f0-9]{3,8}','g');
+      html=html.replace(re,prop+' '+colorMap[prop]);
+    }
+  }
+  var cfgObj={
+    coverPhoto:cfg.coverPhoto||'',heroPhoto:cfg.heroPhoto||'',musicUrl:cfg.musicUrl||'',
+    bride:cfg.bride||'',groom:cfg.groom||'',
+    weddingDate:cfg.weddingDate||'',dayName:cfg.dayName||'',dayNumber:cfg.dayNumber||'',
+    month:cfg.month||'',year:cfg.year||'',quote:cfg.quote||'',
+    ceremonyVenue:cfg.ceremonyVenue||'',ceremonyAddress:cfg.ceremonyAddress||'',
+    ceremonyTime:cfg.ceremonyTime||'',ceremonyMapsUrl:cfg.ceremonyMapsUrl||'',
+    receptionVenue:cfg.receptionVenue||'',receptionAddress:cfg.receptionAddress||'',
+    receptionTime:cfg.receptionTime||'',receptionMapsUrl:cfg.receptionMapsUrl||'',
+    timeline:cfg.timeline||[],photos:cfg.photos||[],
+    rsvpEmail:cfg.rsvpEmail||'',whatsappNumber:cfg.whatsappNumber||'',googleFormUrl:cfg.googleFormUrl||'',
+    ourSong:cfg.ourSong||'',ourSongArtist:cfg.ourSongArtist||'',spotifyUrl:cfg.spotifyUrl||'',
+    dresscode:cfg.dresscode||'',dresscodeDescription:cfg.dresscodeDescription||'',
+    dresscodeColors:cfg.dresscodeColors||[],
+    gifts:cfg.gifts||[],giftsNote:cfg.giftsNote||'',
+    closingMessage:cfg.closingMessage||'',hashtag:cfg.hashtag||'',
+    calendarTitle:cfg.calendarTitle||'',calendarLocation:cfg.calendarLocation||'',
+    theme:cfg.theme||'dorado-clasico'
+  };
+  var configStart=html.indexOf('const CONFIG = {');
+  if(configStart===-1) configStart=html.indexOf('const CONFIG={');
+  if(configStart!==-1){
+    var depth=0;var configEnd=-1;
+    for(var i=html.indexOf('{',configStart);i<html.length;i++){
+      if(html[i]==='{')depth++;
+      if(html[i]==='}')depth--;
+      if(depth===0){configEnd=i+1;break;}
+    }
+    if(configEnd!==-1){
+      if(html[configEnd]===';')configEnd++;
+      var newConfig='const CONFIG = '+JSON.stringify(cfgObj,null,2)+';';
+      html=html.substring(0,configStart)+newConfig+html.substring(configEnd);
+    }
+  }
+  html=html.replace(/<title>[^<]*<\/title>/,'<title>'+(cfg.bride||'')+' & '+(cfg.groom||'')+' — Nuestra Boda</title>');
+  return html;
+}
+
+// ═══ UTILS ═══
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function ea(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function toast(msg,type){
+  var t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast '+(type||'')+' show';setTimeout(function(){t.classList.remove('show')},3000);
+}
+</script>
+</body>
+</html>

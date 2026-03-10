@@ -2954,19 +2954,6 @@ body[data-theme="sunset"] .footer-hashtag {
         </div>
         <input type="hidden" id="rsvp-attendance" value="si">
       </div>
-      <div class="form-group" id="meal-group">
-        <label for="rsvp-meal">Preferencia de menú</label>
-        <select id="rsvp-meal">
-          <option value="">Selecciona una opción</option>
-          <option value="clasico">Menú Clásico</option>
-          <option value="vegetariano">Menú Vegetariano</option>
-          <option value="vegano">Menú Vegano</option>
-        </select>
-      </div>
-      <div class="form-group" id="dietary-group">
-        <label for="rsvp-dietary">Restricciones alimentarias</label>
-        <input type="text" id="rsvp-dietary" placeholder="Alergias, intolerancias, etc.">
-      </div>
       <div class="form-group">
         <label for="rsvp-message">Mensaje para los novios</label>
         <textarea id="rsvp-message" placeholder="Escríbenos unas palabras..."></textarea>
@@ -3675,12 +3662,9 @@ function initRSVP() {
     }
 
     const attendance = document.getElementById('rsvp-attendance').value;
-    const meal = document.getElementById('rsvp-meal').value;
-    const dietary = document.getElementById('rsvp-dietary').value.trim();
     const message = document.getElementById('rsvp-message').value.trim();
 
     const attendText = attendance === 'si' ? 'Sí, asistiré ✅' : 'No podré asistir ❌';
-    const mealText = meal === 'clasico' ? 'Menú Clásico' : meal === 'vegetariano' ? 'Menú Vegetariano' : meal === 'vegano' ? 'Menú Vegano' : 'No especificado';
 
     const waMsg = 
       `💍 *CONFIRMACIÓN DE ASISTENCIA*\n` +
@@ -3688,8 +3672,6 @@ function initRSVP() {
       `━━━━━━━━━━━━━━━━━━━━\n\n` +
       `👤 *Nombre:*\n${name}\n\n` +
       `📋 *Asistencia:*\n${attendText}\n\n` +
-      (attendance === 'si' ? `🍽️ *Menú:*\n${mealText}\n\n` : '') +
-      (dietary ? `⚠️ *Restricciones:*\n${dietary}\n\n` : '') +
       (message ? `💌 *Mensaje para los novios:*\n${message}\n\n` : '') +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `Enviado desde la invitación digital 💒`;
@@ -3702,7 +3684,7 @@ function initRSVP() {
     } else if (CONFIG.rsvpEmail) {
       const subject = encodeURIComponent(`RSVP Boda ${CONFIG.bride} & ${CONFIG.groom} — ${name}`);
       const body = encodeURIComponent(
-        `Nombre: ${name}\nAsistencia: ${attendText}\nMenú: ${mealText}\nRestricciones: ${dietary || 'Ninguna'}\nMensaje: ${message || 'Sin mensaje'}`
+        `Nombre: ${name}\nAsistencia: ${attendText}\nMensaje: ${message || 'Sin mensaje'}`
       );
       window.location.href = `mailto:${CONFIG.rsvpEmail}?subject=${subject}&body=${body}`;
     }

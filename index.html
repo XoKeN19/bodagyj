@@ -3664,17 +3664,17 @@ function initRSVP() {
     const attendance = document.getElementById('rsvp-attendance').value;
     const message = document.getElementById('rsvp-message').value.trim();
 
-    const attendText = attendance === 'si' ? 'Sí, asistiré ✅' : 'No podré asistir ❌';
+    const attendText = attendance === 'si' ? 'SI, ASISTIRE' : 'NO PODRE ASISTIR';
 
     const waMsg = 
-      `💍 *CONFIRMACIÓN DE ASISTENCIA*\n` +
+      `*CONFIRMACION DE ASISTENCIA*\n` +
       `Boda de *${CONFIG.bride} & ${CONFIG.groom}*\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 *Nombre:*\n${name}\n\n` +
-      `📋 *Asistencia:*\n${attendText}\n\n` +
-      (message ? `💌 *Mensaje para los novios:*\n${message}\n\n` : '') +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `Enviado desde la invitación digital 💒`;
+      `========================================\n\n` +
+      `*Nombre:*\n${name}\n\n` +
+      `*Asistencia:*\n${attendText}\n\n` +
+      (message ? `*Mensaje para los novios:*\n${message}\n\n` : '') +
+      `========================================\n` +
+      `Enviado desde la invitacion digital`;
 
     if (CONFIG.googleFormUrl) {
       window.open(CONFIG.googleFormUrl, '_blank');

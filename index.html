@@ -338,9 +338,9 @@ button {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Hero photo below date block */
+/* Hero photo between Save the Date and names */
 .hero-photo-container {
-  margin-top: var(--space-lg);
+  margin: var(--space-md) 0;
   position: relative;
   display: flex;
   justify-content: center;
@@ -2695,7 +2695,7 @@ body[data-theme="sunset"] .footer-hashtag {
       <div id="splash-center"></div>
     </div>
 
-    <p class="splash-welcome">Bienvenidos a la invitación de</p>
+    <p class="splash-welcome">Nos casamos!</p>
     <h2 class="splash-names" id="splash-names"></h2>
 
     <div class="splash-buttons">
@@ -2772,15 +2772,10 @@ body[data-theme="sunset"] .footer-hashtag {
 
   <div class="hero-content">
     <div id="hero-cover-photo-wrap"></div>
-    <p class="hero-save-the-date">Save the Date</p>
+    <p class="hero-save-the-date">Una fecha para recordar</p>
 
-    <h1 class="hero-names shimmer-text" id="hero-names">
-      <span class="hero-name-line" id="hero-bride"></span>
-      <span class="hero-name-line">&amp;</span>
-      <span class="hero-name-line" id="hero-groom"></span>
-    </h1>
-
-    <p class="hero-quote" id="hero-quote"></p>
+    <!-- Hero Photo (between Save the Date and names) -->
+    <div id="hero-photo-wrap" class="hero-photo-container"></div>
 
     <div class="hero-date-block">
       <span class="hero-date-side" id="hero-day-name"></span>
@@ -2790,9 +2785,18 @@ body[data-theme="sunset"] .footer-hashtag {
       </div>
       <span class="hero-date-side" id="hero-month"></span>
     </div>
+    
 
-    <!-- Hero Photo (below date block) -->
-    <div id="hero-photo-wrap" class="hero-photo-container"></div>
+    <h1 class="hero-names shimmer-text" id="hero-names">
+      <span class="hero-name-line" id="hero-bride"></span>
+      <span class="hero-name-line">&amp;</span>
+      <span class="hero-name-line" id="hero-groom"></span>
+    </h1>
+
+    <p class="hero-quote" id="hero-quote"></p>
+
+
+
   </div>
 
   <a href="#countdown" class="hero-scroll-arrow" aria-label="Desplazar hacia abajo">
@@ -3080,8 +3084,8 @@ body[data-theme="sunset"] .footer-hashtag {
 const CONFIG = {
   // ── Cover Photo & Music ─────────────────────────────────────
   coverPhoto: "",                    // URL to couple's photo (shown in splash screen & hero). Leave empty for initials only.
-  heroPhoto: "",                     // URL to a photo displayed below Save the Date with transparent fade animation.
-  musicUrl: "",                      // URL to background music MP3. Leave empty to hide music buttons.
+  heroPhoto: "bodafoto.jpeg",        // Photo displayed between Save the Date and names
+  musicUrl: "die-with-a-smile.mp3",  // Die With A Smile - Bruno Mars & Lady Gaga (add MP3 file to repo)
 
   // ── Names ──────────────────────────────────────────────────
   bride: "Georgia Contreras",        // Bride's full name
@@ -3117,19 +3121,19 @@ const CONFIG = {
   // icon options: "heart", "coffee", "ring", "church"
   timeline: [
     {
-      date: "Marzo 2018",
+      date: "Marzo 2000",
       title: "Nos Conocimos",
       text: "Una tarde inesperada en la parroquia, nuestras miradas se cruzaron y algo en el universo cambió para siempre.",
       icon: "heart"
     },
     {
-      date: "Junio 2018",
-      title: "Nuestro Reencuentro",
+      date: "Junio 2015",
+      title: "Segunda Primera Cita ",
       text: "La vida nos dio la oportunidad de reencontrarnos para vivir un hermoso amor de juventud que habíamos dejado pendiente.",
       icon: "coffee"
     },
     {
-      date: "Diciembre 2024",
+      date: "Agosto 2025",
       title: "La Propuesta",
       text: "Bajo un cielo estrellado junto al mar, con el sonido de las olas como testigo, la pregunta más importante fue respondida con lágrimas de alegría.",
       icon: "ring"
@@ -3143,8 +3147,15 @@ const CONFIG = {
   ],
 
   // ── Gallery ────────────────────────────────────────────────
-  // Array of photo URLs. Leave empty for elegant placeholders.
-  photos: [],
+  // Array of photo URLs for the gallery section
+  photos: [
+    "bodafoto2.jpeg",
+    "bodafoto3.jpeg",
+    "bodafoto4.jpeg",
+    "bodafoto5.jpeg",
+    "bodafoto6.jpeg",
+    "bodafoto7.jpeg"
+  ],
 
   // ── RSVP ───────────────────────────────────────────────────
   rsvpEmail: "boda.georgia.josemiguel@gmail.com",  // Email for mailto RSVP (fallback)
@@ -3152,8 +3163,8 @@ const CONFIG = {
   googleFormUrl: "",  // Optional: Google Form URL. If set, redirects there instead.
 
   // ── Music ──────────────────────────────────────────────────
-  ourSong: "Perfect",              // Song title
-  ourSongArtist: "Ed Sheeran",    // Artist name
+  ourSong: "Die With A Smile",              // Song title
+  ourSongArtist: "Bruno Mars & Lady Gaga",  // Artist name
   spotifyUrl: "",                  // Optional: Spotify embed URL (e.g. "https://open.spotify.com/embed/track/...")
 
   // ── Dresscode ──────────────────────────────────────────────

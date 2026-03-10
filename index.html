@@ -3726,8 +3726,8 @@ function renderFooter() {
 
   const btns = document.getElementById('share-buttons');
   btns.innerHTML = `
-    <button class="btn-share" onclick="shareInvitation()" aria-label="Compartir invitación">
-      ${ICONS.share} Compartir
+    <button class="btn-share" onclick="shareInvitation()" aria-label="Compartir en Instagram">
+      ${ICONS.share} Compartir en Instagram
     </button>
     <button class="btn-share" onclick="copyLink()" aria-label="Copiar enlace" id="copy-btn">
       ${ICONS.copy} Copiar enlace
@@ -3736,15 +3736,18 @@ function renderFooter() {
 }
 
 function shareInvitation() {
-  if (navigator.share) {
-    navigator.share({
-      title: `${CONFIG.groom} & ${CONFIG.bride} — Nuestra Boda`,
-      text: `¡Estás invitado/a a nuestra boda! ${CONFIG.dayNumber} de ${CONFIG.month}, ${CONFIG.year}`,
-      url: window.location.href
-    }).catch(() => {});
-  } else {
-    copyLink();
-  }
+  // Open Instagram app with the wedding hashtag
+  const hashtag = CONFIG.hashtag.replace('#', '');
+  const instagramUrl = `instagram://camera?text=${encodeURIComponent(CONFIG.hashtag)}`;
+  const instagramWebUrl = `https://www.instagram.com/explore/tags/${hashtag}/`;
+  
+  // Try to open Instagram app first, fallback to web
+  window.location.href = instagramUrl;
+  
+  // If app doesn't open in 1.5 seconds, open Instagram web
+  setTimeout(() => {
+    window.open(instagramWebUrl, '_blank');
+  }, 1500);
 }
 
 function copyLink() {

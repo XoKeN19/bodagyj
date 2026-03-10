@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="Georgia & José Miguel — Nuestra Boda">
+<meta property="og:title" content="José Miguel & Georgia — Nuestra Boda">
 <meta property="og:description" content="Invitación de Matrimonio — 11 de Abril, 2026">
 <meta property="og:image" content="">
 <meta name="theme-color" content="#C9A96E">
-<meta name="description" content="Invitación de Matrimonio — Georgia Contreras & José Miguel Garcia">
+<meta name="description" content="Invitación de Matrimonio — José Miguel Garcia &  Georgia Contreras">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
-<title>Georgia & José Miguel — Nuestra Boda</title>
+<title>José Miguel & Georgia   — Nuestra Boda</title>
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -387,9 +387,26 @@ button {
 }
 
 @keyframes heroPhotoFadeIn {
-  0% { opacity: 0; transform: translateY(30px) scale(0.92); filter: blur(8px); }
-  40% { filter: blur(2px); }
-  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  0% { 
+    opacity: 0; 
+    transform: translateY(60px) scale(0.7) rotateX(15deg); 
+    filter: blur(20px) brightness(1.5);
+  }
+  30% { 
+    filter: blur(8px) brightness(1.2);
+  }
+  60% { 
+    transform: translateY(-10px) scale(1.02) rotateX(0deg);
+    filter: blur(2px) brightness(1.05);
+  }
+  80% {
+    transform: translateY(5px) scale(0.99);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1) rotateX(0deg); 
+    filter: blur(0) brightness(1);
+  }
 }
 
 @keyframes heroPhotoGlow {
@@ -1083,10 +1100,102 @@ button {
 }
 
 /* ═══════════════════════════════════════════
-   5. GALLERY
+   5. GALLERY with Curtain Reveal
    ═══════════════════════════════════════════ */
 #gallery {
   padding: var(--space-xl) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Elegant curtain overlay that opens like theater curtains */
+.gallery-curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 10;
+  transition: transform 2.2s cubic-bezier(0.65, 0, 0.35, 1), opacity 2.2s ease;
+  pointer-events: none;
+  box-shadow: 0 0 60px rgba(0,0,0,0.15);
+}
+
+.gallery-curtain-left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    #F4C2C2 0%,
+    #FFD1DC 20%,
+    #FFC0CB 40%,
+    #FFB6C1 60%,
+    rgba(255,182,193,0.95) 80%,
+    rgba(255,182,193,0.8) 100%
+  );
+  transform-origin: left center;
+  border-right: 3px solid rgba(201, 169, 110, 0.4);
+}
+
+.gallery-curtain-right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    #F4C2C2 0%,
+    #FFD1DC 20%,
+    #FFC0CB 40%,
+    #FFB6C1 60%,
+    rgba(255,182,193,0.95) 80%,
+    rgba(255,182,193,0.8) 100%
+  );
+  transform-origin: right center;
+  border-left: 3px solid rgba(201, 169, 110, 0.4);
+}
+
+/* Fabric texture effect */
+.gallery-curtain::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.08) 3px,
+      rgba(255,255,255,0.08) 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255,255,255,0.05) 2px,
+      rgba(255,255,255,0.05) 4px
+    );
+  pointer-events: none;
+}
+
+/* Curtain rod/top decoration */
+.gallery-curtain::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(201, 169, 110, 0.6), transparent);
+  box-shadow: 0 2px 8px rgba(201, 169, 110, 0.3);
+}
+
+/* Opening animation */
+#gallery.curtains-open .gallery-curtain-left {
+  transform: translateX(-102%);
+  opacity: 0;
+}
+
+#gallery.curtains-open .gallery-curtain-right {
+  transform: translateX(102%);
+  opacity: 0;
 }
 
 .gallery-grid {
@@ -1094,6 +1203,8 @@ button {
   column-gap: var(--space-sm);
   max-width: 1000px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {
@@ -1111,8 +1222,22 @@ button {
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform var(--transition-smooth);
+  transition: transform var(--transition-smooth), opacity 0.6s ease;
+  opacity: 0;
+  transform: scale(0.9);
 }
+
+#gallery.curtains-open .gallery-item {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#gallery.curtains-open .gallery-item:nth-child(1) { transition-delay: 0.3s; }
+#gallery.curtains-open .gallery-item:nth-child(2) { transition-delay: 0.4s; }
+#gallery.curtains-open .gallery-item:nth-child(3) { transition-delay: 0.5s; }
+#gallery.curtains-open .gallery-item:nth-child(4) { transition-delay: 0.6s; }
+#gallery.curtains-open .gallery-item:nth-child(5) { transition-delay: 0.7s; }
+#gallery.curtains-open .gallery-item:nth-child(6) { transition-delay: 0.8s; }
 
 .gallery-item:hover {
   transform: scale(1.02);
@@ -1453,29 +1578,21 @@ button {
 }
 
 .swatch {
-  width: 52px;
-  height: 52px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(201, 169, 110, 0.3);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform var(--transition-smooth);
   position: relative;
 }
 
 .swatch:hover {
-  transform: scale(1.15);
+  transform: scale(1.3);
 }
 
 .swatch-label {
-  position: absolute;
-  bottom: -22px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  white-space: nowrap;
+  display: none;
 }
 
 .dresscode-text {
@@ -2908,6 +3025,10 @@ body[data-theme="sunset"] .footer-hashtag {
      5. GALLERY
      ═══════════════════════════════════════════ -->
 <section id="gallery" class="section-padding" aria-label="Galería de fotos">
+  <!-- Curtain overlays -->
+  <div class="gallery-curtain gallery-curtain-left"></div>
+  <div class="gallery-curtain gallery-curtain-right"></div>
+  
   <div class="container text-center">
     <p class="label reveal">Momentos que atesoramos</p>
     <h2 class="section-title reveal">Galería</h2>
@@ -3114,7 +3235,7 @@ const CONFIG = {
       icon: "heart"
     },
     {
-      date: "Junio 2015",
+      date: "Agosto 2015",
       title: "Segunda Primera Cita ",
       text: "La vida nos dio la oportunidad de reencontrarnos para vivir un hermoso amor de juventud que habíamos dejado pendiente.",
       icon: "coffee"
@@ -3157,13 +3278,15 @@ const CONFIG = {
   // ── Dresscode ──────────────────────────────────────────────
   dresscode: "Formal Noche",   // Dresscode label
   dresscodeDescription: "Te invitamos a vestir de manera elegante y formal de noche. Para ellas sugerimos rosa pastel. Por favor evitar el color blanco, reservado para la novia.",
-  // Color swatches: { color (hex), name }
+  // Color swatches: dots in various pink shades
   dresscodeColors: [
-    { color: "#F4C2C2", name: "Rosa Pastel" },
-    { color: "#C9A96E", name: "Dorado" },
-    { color: "#1a1612", name: "Negro" },
-    { color: "#D4C5B2", name: "Arena" },
-    { color: "#7A8C5E", name: "Sage" }
+    { color: "#FFB6C1", name: "" },
+    { color: "#FFC0CB", name: "" },
+    { color: "#FF69B4", name: "" },
+    { color: "#DB7093", name: "" },
+    { color: "#C71585", name: "" },
+    { color: "#FFD1DC", name: "" },
+    { color: "#E75480", name: "" }
   ],
 
   // ── Gifts / Regalos ──────────────────────────────────────
@@ -3179,11 +3302,11 @@ const CONFIG = {
 
   // ── Footer ─────────────────────────────────────────────────
   closingMessage: "Su presencia es el mejor regalo que podemos recibir. Los esperamos con el corazón lleno de ilusión para compartir juntos este día tan especial.",
-  hashtag: "#GeorgiaYJoséMiguel2026",
+  hashtag: "#JoséMiguelYGeorgia2026",
 
   // ── Calendar ───────────────────────────────────────────────
   // Used for "Add to Calendar" button
-  calendarTitle: "Boda Georgia & José Miguel",
+  calendarTitle: "Boda José Miguel & Georgia",
   calendarLocation: "Iglesia del Nazareno Jesús Pan de Vida, Arica, Chile",
 
   // ── Theme ────────────────────────────────────────────────
@@ -3260,7 +3383,7 @@ function renderSplash() {
     const bI = CONFIG.bride.charAt(0).toUpperCase();
     const gI = CONFIG.groom.charAt(0).toUpperCase();
     center.className = 'splash-initials';
-    center.innerHTML = bI + '<span class="splash-amp">&</span>' + gI;
+    center.innerHTML = gI + '<span class="splash-amp">&</span>' + bI; // Groom first (J & G)
   }
 
   // If no music URL, hide music button and change the other button text
@@ -3710,6 +3833,20 @@ function initScrollReveal() {
   });
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Gallery curtain reveal
+  const gallery = document.getElementById('gallery');
+  const curtainObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('curtains-open');
+        curtainObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.2
+  });
+  if (gallery) curtainObserver.observe(gallery);
 }
 
 // ── Scroll Progress Bar ────────────────────────────────────

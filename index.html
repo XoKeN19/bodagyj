@@ -3373,8 +3373,8 @@ function renderSplash() {
   const center = document.getElementById('splash-center');
   const namesEl = document.getElementById('splash-names');
 
-  // Set names
-  namesEl.textContent = CONFIG.bride + ' & ' + CONFIG.groom;
+  // Set names (groom first)
+  namesEl.textContent = CONFIG.groom + ' & ' + CONFIG.bride;
 
   // Show cover photo or initials inside the geometric frame
   if (CONFIG.coverPhoto) {
@@ -3476,10 +3476,10 @@ function renderHero() {
   document.getElementById('hero-year').textContent = CONFIG.year;
   document.getElementById('hero-month').textContent = CONFIG.month;
 
-  // Update meta tags
-  document.querySelector('meta[property="og:title"]').content = CONFIG.bride + ' & ' + CONFIG.groom + ' — Nuestra Boda';
+  // Update meta tags (groom first)
+  document.querySelector('meta[property="og:title"]').content = CONFIG.groom + ' & ' + CONFIG.bride + ' — Nuestra Boda';
   document.querySelector('meta[property="og:description"]').content = 'Invitación de Matrimonio — ' + CONFIG.dayNumber + ' de ' + CONFIG.month + ', ' + CONFIG.year;
-  document.title = CONFIG.bride + ' & ' + CONFIG.groom + ' — Nuestra Boda';
+  document.title = CONFIG.groom + ' & ' + CONFIG.bride + ' — Nuestra Boda';
 }
 
 // ── Floating Petals ────────────────────────────────────────
@@ -3738,7 +3738,7 @@ function renderFooter() {
 function shareInvitation() {
   if (navigator.share) {
     navigator.share({
-      title: `${CONFIG.bride} & ${CONFIG.groom} — Nuestra Boda`,
+      title: `${CONFIG.groom} & ${CONFIG.bride} — Nuestra Boda`,
       text: `¡Estás invitado/a a nuestra boda! ${CONFIG.dayNumber} de ${CONFIG.month}, ${CONFIG.year}`,
       url: window.location.href
     }).catch(() => {});
@@ -3791,7 +3791,7 @@ function initRSVP() {
 
     const waMsg = 
       `*CONFIRMACION DE ASISTENCIA*\n` +
-      `Boda de *${CONFIG.bride} & ${CONFIG.groom}*\n` +
+      `Boda de *${CONFIG.groom} & ${CONFIG.bride}*\n` +
       `========================================\n\n` +
       `*Nombre:*\n${name}\n\n` +
       `*Asistencia:*\n${attendText}\n\n` +
@@ -3805,7 +3805,7 @@ function initRSVP() {
       const waUrl = 'https://wa.me/' + CONFIG.whatsappNumber.replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(waMsg);
       window.open(waUrl, '_blank');
     } else if (CONFIG.rsvpEmail) {
-      const subject = encodeURIComponent(`RSVP Boda ${CONFIG.bride} & ${CONFIG.groom} — ${name}`);
+      const subject = encodeURIComponent(`RSVP Boda ${CONFIG.groom} & ${CONFIG.bride} — ${name}`);
       const body = encodeURIComponent(
         `Nombre: ${name}\nAsistencia: ${attendText}\nMensaje: ${message || 'Sin mensaje'}`
       );
